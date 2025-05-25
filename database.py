@@ -63,3 +63,24 @@ async def get_all_gips():
     async with pool.acquire() as conn:
         rows = await conn.fetch("SELECT telegram_id FROM users WHERE role = 'гип'")
         return [row["telegram_id"] for row in rows]
+
+async def update_order_document(order_id: int, new_path: str):
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            UPDATE orders
+            SET document_url = $1
+            WHERE id = $2
+        """, new_path, order_id)
+
+async def get_order_by_customer_id(customer_telegram_id: int):
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            SELECT o.*
+            FROM orders o
+            JOIN users u ON o.customer_id = u.id
+            WHERE u.telegram_id = $1
+            ORDER BY o.created_at DESC
+            LIMIT 1
+        """, customer_telegram_id)
+        return dict(row) if row else None
+

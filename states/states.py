@@ -12,3 +12,6 @@ class CreateOrder(StatesGroup):
     waiting_for_title = State()
     waiting_for_description = State()
     waiting_for_document = State()
+
+class FixOrder(StatesGroup):
+    waiting_for_document = State()

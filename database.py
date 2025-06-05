@@ -84,3 +84,37 @@ async def get_order_by_customer_id(customer_telegram_id: int):
         """, customer_telegram_id)
         return dict(row) if row else None
 
+
+async def get_orders_by_customer_telegram(telegram_id: int):
+    async with pool.acquire() as conn:
+        return await conn.fetch("""
+            SELECT o.id, o.title, o.status
+            FROM orders o
+            JOIN customers c ON o.customer_id = c.id
+            WHERE c.telegram_id = $1
+            ORDER BY o.created_at DESC
+        """, telegram_id)
+
+
+async def get_order_by_id(order_id: int):
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT * FROM orders WHERE id = $1", order_id)
+        return dict(row) if row else None
+
+
+# Получить специалиста по разделу
+async def get_specialist_by_section(section: str):
+    async with pool.acquire() as conn:
+        return await conn.fetchrow("""
+            SELECT id, telegram_id FROM users
+            WHERE role = 'специалист' AND section = $1
+            LIMIT 1
+        """, section)
+
+
+async def update_order_status(order_id: int, status: str):
+    async with pool.acquire() as conn:
+        await conn.execute(
+            "UPDATE orders SET status = $1 WHERE id = $2",
+            status, order_id
+        )

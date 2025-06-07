@@ -118,3 +118,16 @@ async def update_order_status(order_id: int, status: str):
             "UPDATE orders SET status = $1 WHERE id = $2",
             status, order_id
         )
+
+
+async def get_order_pending_fix_by_customer(customer_telegram_id: int):
+    async with pool.acquire() as conn:
+        return await conn.fetchrow("""
+            SELECT o.*
+            FROM orders o
+            JOIN users u ON o.customer_id = u.id
+            WHERE u.telegram_id = $1 AND o.status = 'pending_correction'
+            LIMIT 1
+        """, customer_telegram_id)
+
+

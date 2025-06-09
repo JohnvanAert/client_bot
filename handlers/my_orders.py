@@ -162,19 +162,7 @@ async def receive_fixed_zip_from_customer(message: Message, state: FSMContext):
         )
 
     await message.answer("✅ Спасибо! ZIP-файл передан исполнителям.")
-
-    # Обновляем статус
-    await update_order_status(order["id"], "ird_received")
-    
-# @router.callback_query(F.data.startswith("send_fixed_docs:"))
-# async def handle_fixed_docs_button(callback: CallbackQuery, state: FSMContext):
-#     order_id = int(callback.data.split(":")[1])
-#     await state.set_state(ReviewCorrectionFSM.waiting_for_customer_zip)
-#     await state.update_data(order_id=order_id)
-
-#     await callback.answer()
-#     await callback.message.answer("📤 Пожалуйста, прикрепите исправленные документы в формате .zip")
-
+ 
 @router.callback_query(F.data.startswith("send_fixed_docs:"))
 async def handle_fixed_docs_button(callback: CallbackQuery):
     await callback.answer()
